@@ -1,4 +1,5 @@
 -- veLiveEQ.lua
+-- Repository: https://github.com/C6G3/BNG-C6g3Transformers
 -- Vehicle Editor Live Extension: Live EQ & Amplifier Adjuster
 -- Displays and controls all c6g3SoundSystem_EQs defined in JBeam.
 -- Follows the same topology and registration pattern as veSpeakerTransformer.lua.

@@ -1,4 +1,5 @@
 -- Prop Trigger Transformer — vehicle editor live extension for BeamNG.drive.
+-- Repository: https://github.com/C6G3/BNG-C6g3Transformers
 
 local M = {}
 
