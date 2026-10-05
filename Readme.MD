@@ -124,9 +124,9 @@ The selected speaker is drawn with:
 **Resonance Tuning**: one peaking EQ band for the driver's natural resonance: **Peak Freq**, **Peak Gain**, **Peak Q**.
 
 **Overdrive & Distortion**
-- **Dist Threshold (dB)**: level above which the driver starts to saturate. 0 dB or higher means no distortion.
-- **Distortion Factor**: how hard it saturates. 0 is a clean bypass.
-- Distortion is applied at the driver stage, so it reacts to the amp signal (master volume and EQ). Lower the threshold or turn up the volume to hear it.
+- **Distortion Factor**: the drive. **0 is a clean bypass.** Between 0 and 1 the overdriven signal fades in, and above 1 it pushes harder into saturation (about 2 gives warmth, 10 clear grit, 50 fuzz). The distortion is audible at any listening volume.
+- **Dist Threshold (dB)**: the driver's clipping ceiling, where saturation begins. A lower threshold distorts earlier and also caps the output lower, so the speaker gets quieter as it distorts. Make up the level with **Gain**.
+- Both sliders ramp smoothly while you drag, just like gain and the filters.
 
 > **Tip:** every slider has a small box to its right with the slider's **maximum**. Type a bigger number if you need more range, for example more than +30 dB of gain.
 
@@ -247,7 +247,7 @@ Every change re-applies the triggers on the live vehicle, so you can test the ne
 | *"c6g3SoundSystem extension not loaded"* (Live EQ) | The sound-system mod isn't installed or active for this vehicle. |
 | Clicking in the viewport selects the whole car | Make sure the transformer window is open: the vehicle only becomes unselectable while it is. |
 | Changes vanished after a reload | Expected: edits live in memory only. Paste the **Master Copy** output into your JBeam. |
-| Distortion makes no audible difference | Lower **Dist Threshold** (for example to -12 dB) or raise the master volume. Nothing distorts unless the signal goes above the threshold. |
+| Distortion makes no audible difference | Raise **Distortion Factor** above 1, where the drive starts. Make sure your `c6g3SoundSystem` is up to date and press **F5** once so the UI reloads its audio graph. |
 
 ## Credits
 
