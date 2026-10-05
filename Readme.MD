@@ -12,22 +12,57 @@ Live editing tools for the **BeamNG.drive Vehicle Editor**. They let you place, 
 
 ## Installation
 
-1. Download or clone this repository.
-2. Copy the `c6g3Transformers` folder into your BeamNG mods folder as an unpacked mod:
+1. Download **`c6g3Transformers.zip`** from the [Releases](https://github.com/C6G3/BNG-C6g3Transformers/releases) page.
+2. Drag the zip, **unextracted**, into your BeamNG user mods folder:
    ```
-   %LOCALAPPDATA%\BeamNG\BeamNG.drive\current\mods\unpacked\c6g3Transformers\
+   %LOCALAPPDATA%\BeamNG\BeamNG.drive\current\mods\
    ```
-   The result should be `...\mods\unpacked\c6g3Transformers\lua\ge\extensions\editor\vehicleEditor\liveEditor\*.lua`.
-   *(Or zip the **contents** of `c6g3Transformers`, so that `lua/` is at the root of the zip, and drop the zip into `mods\`.)*
-3. Start BeamNG.drive and spawn a vehicle that uses the system you want to edit (see the requirements table above).
+   *(Paste that path into the File Explorer address bar to jump straight there.)*
+3. Start (or restart) BeamNG.drive and check that **c6g3Transformers** is enabled in the Mod Manager.
+4. Spawn a vehicle that uses the system you want to edit (see the requirements table above).
+
+To uninstall, delete the zip or disable it in the Mod Manager.
+
+> **Zip only.** BeamNG only loads `.zip` mods, so a `.rar` or `.7z` placed in `mods\` is ignored.
+
+<details>
+<summary>Building the release zip from this repo</summary>
+
+Zip the **contents** of the `c6g3Transformers` folder, not the folder itself, so the zip root looks like this:
+
+```
+c6g3Transformers.zip
+├── lua/ge/extensions/editor/vehicleEditor/liveEditor/
+│   ├── veSpeakerTransformer.lua
+│   ├── veLiveEQ.lua
+│   └── vePropTriggerTransformer.lua
+├── lua/ge/extensions/core/input/actions/c6g3Transformers.json
+└── settings/inputmaps/keyboard_c6g3Transformers.json
+```
+</details>
 
 ## Opening the tools
 
 1. Open the World Editor (**F11**).
-2. Open the **Vehicle Editor** and make sure it is attached to your vehicle.
-3. Pick **Speaker Transformer**, **Live EQ** or **Prop Trigger Transformer** from the Vehicle Editor's live-editor tool list. Each one opens in its own dockable window.
+2. Go to **Window → Vehicles → Vehicle Editor**.
+3. In the Vehicle Editor, switch to the **Live Editor** tab and open the **Apps** menu.
+4. Pick **Speaker Transformer**, **Live EQ** or **Prop Trigger Transformer**. Each one opens in its own dockable window.
 
 While the Speaker Transformer or Prop Trigger Transformer window is open, the vehicle itself is made **unselectable** in the World Editor. Clicks in the viewport then pick speakers or triggers instead of selecting the whole car. The previous setting comes back when you close the window.
+
+## Keyboard shortcuts
+
+While a speaker or prop trigger is **picked** in its transformer window, these keys control that object's gizmo instead of the World Editor's own gizmo:
+
+| Key | Speaker Transformer | Prop Trigger Transformer |
+|---|---|---|
+| **1** | Toggle **Move** gizmo | Toggle **Move** gizmo |
+| **2** | Toggle **Rotate** gizmo | Toggle **Rotate** gizmo |
+| **3** | Toggle **Radius** (scale) gizmo | Toggle **Scale** gizmo |
+
+Press the same key again to turn the gizmo off. The keys are ignored while you're typing in a text field. When nothing is picked, or the window is closed, 1/2/3 go back to the World Editor's normal translate/rotate/scale.
+
+To rebind them, go to **Options → Controls → Bindings → Editor** and look for the actions starting with *Speaker Transformer:* and *Prop Trigger Transformer:*.
 
 > **Edits are live but not saved.** Every change is applied to the running vehicle right away. To keep it, use the **Copy** / **Master Copy** buttons and paste the values into your `.jbeam`. Reloading the vehicle (Ctrl+R) resets everything to what's in the JBeam.
 

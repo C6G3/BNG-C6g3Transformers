@@ -1093,12 +1093,33 @@ local function dynamicMaxSlider(id, valPtr, limitData, format)
   return changed
 end
 
+local stActionMapPushed = false
+
+local function popSpeakerTransformerActionMap()
+  if stActionMapPushed then
+    popActionMap("SpeakerTransformerGizmo")
+    stActionMapPushed = false
+  end
+end
+
+local function updateSpeakerTransformerActionMap()
+  local want = windowOpen[0] and state and state.pickedSpeaker and state.speakersData and vEditor and vEditor.editorActive
+  if want and not stActionMapPushed then
+    pushActionMapHighestPriority("SpeakerTransformerGizmo")
+    stActionMapPushed = true
+  elseif not want and stActionMapPushed then
+    popSpeakerTransformerActionMap()
+  end
+end
+
 local function onUpdate(dt)
   updateBeamngVehicleSelectableLock()
   if not windowOpen[0] or not vEditor or not vEditor.vehicle then
+    popSpeakerTransformerActionMap()
     return
   end
   if not initVehData then switchVehicle(vEditor.vehicle:getID()) end
+  updateSpeakerTransformerActionMap()
 
   if im.Begin(wndName, windowOpen, mainWndFlags) then
     im.PushStyleVar2(im.StyleVar_ItemSpacing, im.ImVec2(6, 4))

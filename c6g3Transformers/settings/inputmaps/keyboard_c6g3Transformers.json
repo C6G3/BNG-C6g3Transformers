@@ -1,0 +1,10 @@
+{
+  "bindings":[
+    {"control":"1", "action":"c6g3SpeakerTransformerGizmoMove"},
+    {"control":"2", "action":"c6g3SpeakerTransformerGizmoRotate"},
+    {"control":"3", "action":"c6g3SpeakerTransformerGizmoScale"},
+    {"control":"1", "action":"c6g3PropTriggerTransformerGizmoMove"},
+    {"control":"2", "action":"c6g3PropTriggerTransformerGizmoRotate"},
+    {"control":"3", "action":"c6g3PropTriggerTransformerGizmoScale"}
+  ]
+}
