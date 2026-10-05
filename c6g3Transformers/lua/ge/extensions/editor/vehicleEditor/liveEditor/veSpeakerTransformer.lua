@@ -1,6 +1,5 @@
 -- Speaker Transformer — vehicle editor live extension for BeamNG.drive.
 -- Repository: https://github.com/C6G3/BNG-C6g3Transformers
--- Forked from Prop Trigger Transformer (vePropTriggerTransformer.lua) and Trigger Transformer (veTriggerTransformer.lua).
 -- Supports dual rotation modes:
 --   1. Prop-Attached Speakers (targetProp defined): Position-fixing rotation math around prop global center.
 --   2. Standard 3-Node Speakers (idx/idy/idRef/idX/idY without targetProp): Standard TriggerTransformer rotation math.
