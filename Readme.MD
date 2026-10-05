@@ -252,7 +252,6 @@ Every change re-applies the triggers on the live vehicle, so you can test the ne
 ## Credits
 
 - Author: **C6G3** (Wamburu G.)
-- The Speaker Transformer is forked from the Prop Trigger Transformer and BeamNG's built-in Trigger Transformer.
 
 ## License
 
