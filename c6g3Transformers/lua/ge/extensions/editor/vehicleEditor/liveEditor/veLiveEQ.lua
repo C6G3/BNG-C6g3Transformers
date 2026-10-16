@@ -16,30 +16,17 @@ M.menuEntry        = "Live EQ"
 local windowOpen = im.BoolPtr(false)
 
 -- ==========================================
--- Vehicle tracking (mirrors veSpeakerTransformer)
+-- Vehicle tracking: the vehicle editor global vEditor (veMain sets vEditor.vehicle on switch and clears it in
+-- onVehicleDestroyed). A local copy here went stale and followed every spawned vehicle, traffic included.
 -- ==========================================
 
-local vEditor = {}
-
 local function getActiveVehId()
-    if vEditor.vehicle then return vEditor.vehicle:getID() end
+    if vEditor and vEditor.vehicle then return vEditor.vehicle:getID() end
     if be then
         local v = be:getPlayerVehicle(0)
         if v then return v:getID() end
     end
     return nil
-end
-
-local function switchVehicle(veh)
-    if type(veh) == 'number' then
-        vEditor.vehicle = be and be:getObjectByID(veh) or nil
-    else
-        vEditor.vehicle = veh
-    end
-end
-
-local function removeVehicle(id)
-    -- nothing to cache, kept for parity with veSpeakerTransformer lifecycle
 end
 
 -- ==========================================
@@ -167,17 +154,8 @@ local function onUpdate()
 end
 
 -- ==========================================
--- Lifecycle hooks (mirrors veSpeakerTransformer)
+-- Lifecycle hooks
 -- ==========================================
-
-local function onVehicleSwitched(oldVehicle, newVehicle, player)
-    switchVehicle(newVehicle)
-end
-
-local function onVehicleSpawned(id)
-    removeVehicle(id)
-    switchVehicle(id)
-end
 
 local function open()
     windowOpen[0] = true
@@ -196,8 +174,6 @@ end
 -- ==========================================
 
 M.onUpdate          = onUpdate
-M.onVehicleSwitched = onVehicleSwitched
-M.onVehicleSpawned  = onVehicleSpawned
 M.open              = open
 M.onSerialize       = onSerialize
 M.onDeserialized    = onDeserialized

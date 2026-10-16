@@ -813,16 +813,6 @@ local function switchVehicle(vehID)
   state = states[vehID]
 end
 
-local function getInitSpeaker(spk)
-  if not spk then return nil end
-  local vehID = vEditor.vehicle and vEditor.vehicle:getID()
-  if not vehID or not initStates[vehID] then return nil end
-  for k, s in pairs(initStates[vehID].speakersData) do
-    if isSpeaker(s) and spkId(s) == spkId(spk) then return s end
-  end
-  return nil
-end
-
 -- Generates cleanly formatted JSON block for a speaker to copy/paste into your jbeam
 local function generateCleanJSON(spk)
   local name = spkId(spk) or "speaker"
@@ -973,7 +963,14 @@ local function float3InputsAndStepBlock(uid, valueArr, fmt, inputFlags, stepPtr3
       im.TextColored(axisLabelCol[i + 1], lbl)
       im.SameLine()
       im.PushItemWidth(-1)
-      local ch = inputFlags and im.InputFloat("##v" .. i, valueArr[i], 0, 0, fmt, inputFlags) or im.InputFloat("##v" .. i, valueArr[i], 0, 0, fmt)
+      -- One widget per axis: an "a and f() or g()" form drew a second field with the same ID whenever f() returned
+      -- false (inputFlags 0 counts as true in Lua)
+      local ch
+      if inputFlags then
+        ch = im.InputFloat("##v" .. i, valueArr[i], 0, 0, fmt, inputFlags)
+      else
+        ch = im.InputFloat("##v" .. i, valueArr[i], 0, 0, fmt)
+      end
       im.PopItemWidth()
       if ch then anyChanged = true end
     end
@@ -1137,8 +1134,6 @@ local function onUpdate(dt)
 
       local spk = state.pickedSpeaker
       if spk then
-        local initSpk = getInitSpeaker(spk)
-
         im.SameLine()
         im.PushFont3("cairo_regular_medium")
         im.TextColored(im.ImVec4(0.75, 0.82, 0.92, 1.0), string.format("  %s  |  Mode: %s", tostring(spkId(spk)), isPropAttachedSpeaker(spk) and "Prop-Attached (Position Fixing)" or "Standard 3-Node"))
@@ -1196,8 +1191,10 @@ local function onUpdate(dt)
           function()
             gizmoButton("Move##gizBTrans", editor.AxisGizmoMode_Translate, "baseTranslation")
             copyArrayButton("baseTrans", "%.4f", inputBaseTranslation[0][0], inputBaseTranslation[1][0], inputBaseTranslation[2][0])
-            if initSpk then
-              local iBT = spkBaseTrans(initSpk)
+            -- Reset targets the values captured when the vehicle was loaded (switchVehicle); initStates shares tables
+            -- with the live vdata, so reading it back returns the edited value and Reset did nothing.
+            local iBT = spk._orig_baseTranslation
+            if iBT then
               resetVec3Button("baseTrans", spk.baseTranslation, iBT, function()
                 spk.translation = vec3(0, 0, 0)
                 if type(spk.position) == 'table' then
@@ -1251,8 +1248,8 @@ local function onUpdate(dt)
           function()
             gizmoButton("Rotate##gizBRot", editor.AxisGizmoMode_Rotate, "baseRotation")
             copyArrayButton("baseRot", "%.3f", inputBaseRotationDeg[0][0], inputBaseRotationDeg[1][0], inputBaseRotationDeg[2][0])
-            if initSpk then
-              local iBR = spkBaseRot(initSpk)
+            local iBR = spk._orig_baseRotation
+            if iBR then
               resetVec3Button("baseRot", spk.baseRotation, iBR, function()
                 spk.rotation = vec3(0, 0, 0)
                 if type(spk.position) == 'table' then

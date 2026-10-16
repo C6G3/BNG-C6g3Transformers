@@ -242,13 +242,80 @@ local function getNodeId(nodeStr)
   return 0
 end
 
+-- Target prop resolution, same rules as the runtime (g81800dd lua/ge/extensions/propTriggers.lua:
+-- extractTargetPropList / propMatchesCandidate / findAvailableProp). targetProp may be one name, a list of the
+-- slot's variants (["wheel_a", "wheel_b"]) or a comma / semicolon list, plus an optional targetProps column. The
+-- first non-disabled prop matching by mesh, original mesh or name is the one the trigger follows.
+local function extractTargetPropList(raw, out, seen)
+  out = out or {}
+  seen = seen or {}
+  if not raw then return out end
+
+  if type(raw) == "table" then
+    for _, item in ipairs(raw) do
+      extractTargetPropList(item, out, seen)
+    end
+    for k, item in pairs(raw) do
+      if type(k) ~= "number" then
+        extractTargetPropList(item, out, seen)
+      end
+    end
+  elseif type(raw) == "string" then
+    if raw:find("[,;]") then
+      for part in raw:gmatch("[^,;]+") do
+        extractTargetPropList(part, out, seen)
+      end
+    else
+      local clean = raw:match("^%s*(.-)%s*$")
+      if clean and clean ~= "" and clean ~= "targetProp" and clean ~= "targetProps" and not seen[clean:lower()] then
+        seen[clean:lower()] = true
+        table.insert(out, clean)
+      end
+    end
+  end
+  return out
+end
+
+local function propMatchesCandidate(prop, candidate)
+  if not prop or not candidate or candidate == "" then return false end
+  local candLower = candidate:lower():gsub("%.dae$", ""):gsub("%.obj$", "")
+
+  local mesh = type(prop.mesh) == "string" and prop.mesh:lower():gsub("%.dae$", ""):gsub("%.obj$", "")
+  if mesh and mesh == candLower then return true end
+
+  local origMesh = type(prop.originalMesh) == "string" and prop.originalMesh:lower():gsub("%.dae$", ""):gsub("%.obj$", "")
+  if origMesh and origMesh == candLower then return true end
+
+  local name = type(prop.name) == "string" and prop.name:lower():gsub("%.dae$", ""):gsub("%.obj$", "")
+  if name and name == candLower then return true end
+
+  return false
+end
+
+local function getTargetPropCandidates(trg)
+  local rawTargetProps = col(trg, "targetProps", -1)
+  local rawTargetProp = col(trg, "targetProp", 2)
+  local seen = {}
+  local candidates = extractTargetPropList(rawTargetProps, nil, seen)
+  if rawTargetProp and rawTargetProp ~= rawTargetProps then
+    extractTargetPropList(rawTargetProp, candidates, seen)
+  end
+  return candidates
+end
+
+local function hasTargetProp(trg)
+  return #getTargetPropCandidates(trg) > 0
+end
+
 local function getTargetPropId(trg)
-  local tProp = col(trg, "targetProp", 2)
-  if not tProp or tProp == "" then return nil end
+  local candidates = getTargetPropCandidates(trg)
+  if #candidates == 0 then return nil end
   local props = vEditor.vdata.props
   if not props then return nil end
-  for _, prop in pairs(props) do
-      if prop.mesh == tProp then return prop.pid end
+  for _, cand in ipairs(candidates) do
+    for _, prop in pairs(props) do
+      if not prop.disabled and propMatchesCandidate(prop, cand) then return prop.pid end
+    end
   end
   return nil
 end
@@ -259,8 +326,7 @@ local function getPropTriggerFrame(trg)
   local stObj = scenetree.findObject(beObj:getID())
   if not stObj then return nil end
 
-  local tProp = col(trg, "targetProp", 2)
-  if tProp and tProp ~= "" then
+  if hasTargetProp(trg) then
       local pid = getTargetPropId(trg)
       if not pid then return nil end
       local propObj = beObj:getProp(pid)
@@ -868,7 +934,13 @@ local function float3InputsAndStepBlock(uid, valueArr, fmt, inputFlags, stepPtr3
       im.TextColored(axisLabelCol[i + 1], lbl)
       im.SameLine()
       im.PushItemWidth(-1)
-      local ch = inputFlags and im.InputFloat("##v" .. i, valueArr[i], 0, 0, fmt, inputFlags) or im.InputFloat("##v" .. i, valueArr[i], 0, 0, fmt)
+      -- One widget per axis: an "a and f() or g()" form drew a second field with the same ID whenever f() returned false
+      local ch
+      if inputFlags then
+        ch = im.InputFloat("##v" .. i, valueArr[i], 0, 0, fmt, inputFlags)
+      else
+        ch = im.InputFloat("##v" .. i, valueArr[i], 0, 0, fmt)
+      end
       im.PopItemWidth()
       if ch then anyChanged = true end
     end
@@ -1040,9 +1112,7 @@ local function onUpdate(dt)
         im.SameLine()
         if smallButton("Master Copy") then
             local idStr = trgId(trg) or ""
-            local tProp = col(trg, "targetProp", 2)
-            local hasTargetProp = (tProp and tProp ~= "")
-            
+
             local typeStr = triggerTypeStr(trg) or "box"
             
             local sizeStr = ""
@@ -1062,15 +1132,29 @@ local function onUpdate(dt)
             local brStr = string.format('{"x":%0.3f, "y":%0.3f, "z":%0.3f}', br.x, br.y, br.z)
             
             local outStr = ""
-            if hasTargetProp then
-                local actionStr = col(trg, "action", 5) or ""
-                outStr = string.format('["%s", "%s", "%s", %s, "%s", %s, %s, ""]', idStr, tProp, typeStr, sizeStr, actionStr, btStr, brStr)
+            if hasTargetProp(trg) then
+                -- ["id","targetProp","type","size","meshName","baseTranslation","baseRotation","action"]
+                local tProp = col(trg, "targetProp", 2)
+                local tPropStr
+                if type(tProp) == 'table' then
+                    local names = extractTargetPropList(tProp)
+                    for i, n in ipairs(names) do names[i] = '"' .. n .. '"' end
+                    tPropStr = "[" .. table.concat(names, ", ") .. "]"
+                else
+                    tPropStr = '"' .. tostring(tProp or "") .. '"'
+                end
+                local meshNameStr = col(trg, "meshName", 5) or ""
+                local actionStr = col(trg, "action", 8) or ""
+                outStr = string.format('["%s", %s, "%s", %s, "%s", %s, %s, "%s"]', idStr, tPropStr, typeStr, sizeStr, meshNameStr, btStr, brStr, actionStr)
             else
-                local idRefStr = col(trg, "idRef", 2) or ""
-                local idXStr = col(trg, "idX", 3) or ""
-                local idYStr = col(trg, "idY", 4) or ""
-                local actionStr = col(trg, "action", 11) or ""
-                outStr = string.format('["%s", "%s", "%s", "%s", "%s", %s, %s, "", "", %s, "%s"]', idStr, idRefStr, idXStr, idYStr, typeStr, sizeStr, brStr, btStr, actionStr)
+                -- Node-based row in the same propTriggers section: same columns, empty targetProp, nodes in the row's
+                -- trailing options dict (jbeam merges a dict after the last column into the row)
+                local idRefStr = trgIdRef(trg) or ""
+                local idXStr = trgIdX(trg) or ""
+                local idYStr = trgIdY(trg) or ""
+                local meshNameStr = col(trg, "meshName", 5) or ""
+                local actionStr = col(trg, "action", 8) or ""
+                outStr = string.format('["%s", "", "%s", %s, "%s", %s, %s, "%s", {"idRef":"%s", "idX":"%s", "idY":"%s"}]', idStr, typeStr, sizeStr, meshNameStr, btStr, brStr, actionStr, idRefStr, idXStr, idYStr)
             end
             im.SetClipboardText(outStr)
         end
