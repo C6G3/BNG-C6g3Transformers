@@ -1,0 +1,10 @@
+{
+    "title": "C6g3 Transformers",
+    "tagid": "C6G3TF01",
+    "author": "C6G3",
+    "version_string": "1.0",
+    "tag_line": "Live editing tools for the BeamNG.drive Vehicle Editor (Speaker Transformer, Live EQ, Prop Trigger Transformer)",
+    "description": "Live editing tools for the BeamNG.drive Vehicle Editor. They let you place, rotate, scale and tune parts of a vehicle in 3D while the vehicle is spawned, then copy the result back into your JBeam.\n\nTools Included:\n- Speaker Transformer (c6g3SoundSystem)\n- Live EQ (c6g3SoundSystem)\n- Prop Trigger Transformer (propTriggers)",
+    "message": "Live editing tools for the BeamNG.drive Vehicle Editor. They let you place, rotate, scale and tune parts of a vehicle in 3D while the vehicle is spawned, then copy the result back into your JBeam.\n\nTools Included:\n- Speaker Transformer (c6g3SoundSystem)\n- Live EQ (c6g3SoundSystem)\n- Prop Trigger Transformer (propTriggers)",
+    "icon": "icon.jpg"
+}

@@ -37,6 +37,9 @@ c6g3Transformers.zip
 │   ├── veLiveEQ.lua
 │   └── vePropTriggerTransformer.lua
 ├── lua/ge/extensions/core/input/actions/c6g3Transformers.json
+├── mod_info/C6G3TF01/
+│   ├── icon.jpg
+│   └── info.json
 └── settings/inputmaps/keyboard_c6g3Transformers.json
 ```
 </details>
